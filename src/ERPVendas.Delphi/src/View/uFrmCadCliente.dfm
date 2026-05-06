@@ -2,7 +2,7 @@ object FrmCadCliente: TFrmCadCliente
   Left = 0
   Top = 0
   Caption = 'Clientes'
-  ClientHeight = 520
+  ClientHeight = 480
   ClientWidth = 900
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -29,78 +29,62 @@ object FrmCadCliente: TFrmCadCliente
       Height = 15
       Caption = 'Filtrar:'
     end
-    object edtFiltro: TcxTextEdit
+    object edtFiltro: TEdit
       Left = 56
       Top = 11
       Width = 260
-      Height = 22
+      Height = 23
       TabOrder = 0
-      object edtFiltro.Properties: TcxTextEditProperties
-        OnChange = edtFiltroPropertiesChange
-      end
+      OnChange = edtFiltroChange
     end
   end
-  object cxGrid: TcxGrid
+  object lvClientes: TListView
     Left = 0
     Top = 44
     Width = 900
-    Height = 432
+    Height = 392
     Align = alClient
+    Columns = <
+      item
+        Caption = 'Id'
+        Width = 50
+      end
+      item
+        Caption = 'Nome'
+        Width = 250
+      end
+      item
+        Caption = 'CPF/CNPJ'
+        Width = 130
+      end
+      item
+        Caption = 'E-mail'
+        Width = 200
+      end
+      item
+        Caption = 'Telefone'
+        Width = 110
+      end
+      item
+        Caption = 'Ativo'
+        Width = 50
+      end>
+    ReadOnly = True
+    RowSelect = True
     TabOrder = 1
-    ExplicitLeft = 0
-    ExplicitTop = 44
-    ExplicitWidth = 900
-    ExplicitHeight = 432
-    object cxGridLevel: TcxGridLevel
-      GridView = cxGridTableView
-    end
-    object cxGridTableView: TcxGridTableView
-      NavigatorButtons.ConfirmDelete = False
-      DataController.Summary.DefaultGroupSummaryItems = <>
-      DataController.Summary.FooterSummaryItems = <>
-      DataController.Summary.SummaryGroups = <>
-      OptionsCustomize.ColumnFiltering = False
-      OptionsView.GroupByBox = False
-      Columns = <
-        item
-          Caption = 'C'#243'digo'
-          MinWidth = 50
-          Width = 70
-        end
-        item
-          Caption = 'Nome'
-          Width = 220
-        end
-        item
-          Caption = 'CPF/CNPJ'
-          Width = 130
-        end
-        item
-          Caption = 'E-mail'
-          Width = 180
-        end
-        item
-          Caption = 'Telefone'
-          Width = 110
-        end
-        item
-          Caption = 'Ativo'
-          MinWidth = 40
-          Width = 50
-        end>
-    end
+    ViewStyle = vsReport
   end
   object pnlBotoes: TPanel
     Left = 0
-    Top = 476
+    Top = 436
     Width = 900
     Height = 44
     Align = alBottom
     BevelOuter = bvNone
     TabOrder = 2
-    ExplicitTop = 476
+    ExplicitTop = 436
     ExplicitWidth = 900
-    object btnNovo: TcxButton
+    object btnNovo: TButton
       Left = 8
       Top = 8
       Width = 88
@@ -109,7 +93,7 @@ object FrmCadCliente: TFrmCadCliente
       TabOrder = 0
       OnClick = btnNovoClick
     end
-    object btnEditar: TcxButton
+    object btnEditar: TButton
       Left = 104
       Top = 8
       Width = 88
@@ -118,7 +102,7 @@ object FrmCadCliente: TFrmCadCliente
       TabOrder = 1
       OnClick = btnEditarClick
     end
-    object btnExcluir: TcxButton
+    object btnExcluir: TButton
       Left = 200
       Top = 8
       Width = 88
@@ -127,7 +111,7 @@ object FrmCadCliente: TFrmCadCliente
       TabOrder = 2
       OnClick = btnExcluirClick
     end
-    object btnFechar: TcxButton
+    object btnFechar: TButton
       Left = 804
       Top = 8
       Width = 88

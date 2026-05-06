@@ -37,6 +37,7 @@ type
 implementation
 
 uses
+  FireDAC.Stan.Param,
   uExceptions;
 
 { TVendaDAO }
@@ -160,10 +161,13 @@ begin
   try
     LQry.Connection := FConexao;
     LQry.SQL.Text :=
-      'UPDATE VENDAS SET STATUS=''QUITADA'', DT_QUITACAO=:DT WHERE ID=:ID';
-    LQry.ParamByName('DT').AsDateTime := ADtQuitacao;
-    LQry.ParamByName('ID').AsInteger  := AIdVenda;
+      'UPDATE VENDAS SET STATUS=:STATUS, DT_QUITACAO=:DT WHERE ID=:ID';
+    LQry.ParamByName('STATUS').AsString := svQuitada.ToString;
+    LQry.ParamByName('DT').AsDateTime   := ADtQuitacao;
+    LQry.ParamByName('ID').AsInteger    := AIdVenda;
     LQry.ExecSQL;
+    if LQry.RowsAffected = 0 then
+      raise ENotFoundException.CreateFmt('Venda id %d nao encontrada.', [AIdVenda]);
   finally
     LQry.Free;
   end;
@@ -177,10 +181,13 @@ begin
   try
     LQry.Connection := FConexao;
     LQry.SQL.Text :=
-      'UPDATE VENDAS SET STATUS=''CANCELADA'', DT_CANCELAMENTO=:DT WHERE ID=:ID';
-    LQry.ParamByName('DT').AsDateTime := ADtCancelamento;
-    LQry.ParamByName('ID').AsInteger  := AIdVenda;
+      'UPDATE VENDAS SET STATUS=:STATUS, DT_CANCELAMENTO=:DT WHERE ID=:ID';
+    LQry.ParamByName('STATUS').AsString := svCancelada.ToString;
+    LQry.ParamByName('DT').AsDateTime   := ADtCancelamento;
+    LQry.ParamByName('ID').AsInteger    := AIdVenda;
     LQry.ExecSQL;
+    if LQry.RowsAffected = 0 then
+      raise ENotFoundException.CreateFmt('Venda id %d nao encontrada.', [AIdVenda]);
   finally
     LQry.Free;
   end;

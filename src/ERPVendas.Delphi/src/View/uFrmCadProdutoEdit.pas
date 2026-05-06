@@ -8,26 +8,25 @@ interface
 uses
   System.SysUtils, System.Classes,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls,
-  cxButtons, cxTextEdit, cxCurrencyEdit, cxCheckBox,
   uProduto, uProdutoService;
 
 type
   TFrmCadProdutoEdit = class(TForm)
     pnlBotoes: TPanel;
-    btnSalvar: TcxButton;
-    btnCancelar: TcxButton;
+    btnSalvar: TButton;
+    btnCancelar: TButton;
     pnlCampos: TPanel;
     lblCodigo: TLabel;
-    edtCodigo: TcxTextEdit;
+    edtCodigo: TEdit;
     lblDescricao: TLabel;
-    edtDescricao: TcxTextEdit;
+    edtDescricao: TEdit;
     lblUnidade: TLabel;
-    edtUnidade: TcxTextEdit;
+    edtUnidade: TEdit;
     lblPrecoVenda: TLabel;
-    edtPrecoVenda: TcxCurrencyEdit;
+    edtPrecoVenda: TEdit;
     lblEstoque: TLabel;
-    edtEstoque: TcxCurrencyEdit;
-    chkAtivo: TcxCheckBox;
+    edtEstoque: TEdit;
+    chkAtivo: TCheckBox;
     procedure FormCreate(Sender: TObject);
     procedure btnSalvarClick(Sender: TObject);
     procedure btnCancelarClick(Sender: TObject);
@@ -45,6 +44,7 @@ implementation
 {$R *.dfm}
 
 uses
+  System.UITypes,
   uExceptions;
 
 class function TFrmCadProdutoEdit.Editar(AService: IProdutoService;
@@ -70,12 +70,12 @@ end;
 
 procedure TFrmCadProdutoEdit.CarregarParaTela;
 begin
-  edtCodigo.Text       := FProduto.Codigo;
-  edtDescricao.Text    := FProduto.Descricao;
-  edtUnidade.Text      := FProduto.Unidade;
-  edtPrecoVenda.Value  := FProduto.PrecoVenda;
-  edtEstoque.Value     := FProduto.Estoque;
-  chkAtivo.Checked     := FProduto.Ativo;
+  edtCodigo.Text    := FProduto.Codigo;
+  edtDescricao.Text := FProduto.Descricao;
+  edtUnidade.Text   := FProduto.Unidade;
+  edtPrecoVenda.Text := FormatFloat('0.00', FProduto.PrecoVenda);
+  edtEstoque.Text   := FormatFloat('0.##', FProduto.Estoque);
+  chkAtivo.Checked  := FProduto.Ativo;
 end;
 
 procedure TFrmCadProdutoEdit.AplicarParaEntidade;
@@ -83,8 +83,8 @@ begin
   FProduto.Codigo    := edtCodigo.Text;
   FProduto.Descricao := edtDescricao.Text;
   FProduto.Unidade   := edtUnidade.Text;
-  FProduto.PrecoVenda := edtPrecoVenda.Value;
-  FProduto.Estoque   := edtEstoque.Value;
+  FProduto.PrecoVenda := StrToCurrDef(edtPrecoVenda.Text, 0);
+  FProduto.Estoque   := StrToFloatDef(edtEstoque.Text, 0);
   FProduto.Ativo     := chkAtivo.Checked;
 end;
 

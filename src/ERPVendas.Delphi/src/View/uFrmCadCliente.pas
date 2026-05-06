@@ -1,40 +1,33 @@
 unit uFrmCadCliente;
 
-{ ----------------------------------------------------------------------------
-  Cadastro de Cliente. View nao acessa DAO direto - sempre via Service.
-  Padrao: classe expoe metodos de classe Listar/Editar que cuidam do ciclo
-  de vida do form, evitando vazamentos.
-  ---------------------------------------------------------------------------- }
+{ Cadastro de Cliente. View nao acessa DAO direto - sempre via Service. }
 
 interface
 
 uses
   System.SysUtils, System.Classes, System.Generics.Collections,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls,
-  cxGraphics, cxControls, cxLookAndFeels, cxContainer, cxEdit, cxTextEdit,
-  cxButtons, cxGrid, cxGridLevel, cxGridCustomTableView, cxGridTableView,
-  cxGridDBTableView, cxGridCustomView,
+  Vcl.ComCtrls,
   uCliente, uClienteService;
 
 type
   TFrmCadCliente = class(TForm)
     pnlFiltro: TPanel;
     lblFiltro: TLabel;
-    edtFiltro: TcxTextEdit;
-    cxGrid: TcxGrid;
-    cxGridLevel: TcxGridLevel;
+    edtFiltro: TEdit;
+    lvClientes: TListView;
     pnlBotoes: TPanel;
-    btnNovo: TcxButton;
-    btnEditar: TcxButton;
-    btnExcluir: TcxButton;
-    btnFechar: TcxButton;
+    btnNovo: TButton;
+    btnEditar: TButton;
+    btnExcluir: TButton;
+    btnFechar: TButton;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure btnNovoClick(Sender: TObject);
     procedure btnEditarClick(Sender: TObject);
     procedure btnExcluirClick(Sender: TObject);
     procedure btnFecharClick(Sender: TObject);
-    procedure edtFiltroPropertiesChange(Sender: TObject);
+    procedure edtFiltroChange(Sender: TObject);
   private
     FService: IClienteService;
     FClientes: TObjectList<TCliente>;
@@ -50,9 +43,8 @@ implementation
 {$R *.dfm}
 
 uses
+  System.UITypes,
   uConnection, uClienteDAO, uExceptions, uFrmCadClienteEdit;
-
-{ TFrmCadCliente }
 
 class procedure TFrmCadCliente.Listar;
 var
@@ -85,46 +77,40 @@ end;
 
 procedure TFrmCadCliente.CarregarGrid;
 var
-  LView: TcxGridTableView;
   LCliente: TCliente;
-  I: Integer;
-  LAtivoStr: string;
+  LItem: TListItem;
 begin
   FreeAndNil(FClientes);
   FClientes := FService.Listar(edtFiltro.Text);
 
-  LView := cxGrid.Views[0] as TcxGridTableView;
-  cxGrid.BeginUpdate;
+  lvClientes.Items.BeginUpdate;
   try
-    // Zera linhas antes de repovoar para evitar linhas fantasma
-    LView.DataController.RecordCount := 0;
-    LView.DataController.RecordCount := FClientes.Count;
-    for I := 0 to FClientes.Count - 1 do
+    lvClientes.Items.Clear;
+    for LCliente in FClientes do
     begin
-      LCliente := FClientes[I];
-      if LCliente.Ativo then LAtivoStr := 'Sim' else LAtivoStr := 'Nao';
-      // Indices correspondem as colunas declaradas no DFM (0=Id,1=Nome,
-      // 2=CpfCnpj,3=Email,4=Telefone,5=Ativo)
-      LView.DataController.Values[I, 0] := LCliente.Id;
-      LView.DataController.Values[I, 1] := LCliente.Nome;
-      LView.DataController.Values[I, 2] := LCliente.CpfCnpj;
-      LView.DataController.Values[I, 3] := LCliente.Email;
-      LView.DataController.Values[I, 4] := LCliente.Telefone;
-      LView.DataController.Values[I, 5] := LAtivoStr;
+      LItem := lvClientes.Items.Add;
+      LItem.Caption := IntToStr(LCliente.Id);
+      LItem.SubItems.Add(LCliente.Nome);
+      LItem.SubItems.Add(LCliente.CpfCnpj);
+      LItem.SubItems.Add(LCliente.Email);
+      LItem.SubItems.Add(LCliente.Telefone);
+      if LCliente.Ativo then
+        LItem.SubItems.Add('Sim')
+      else
+        LItem.SubItems.Add('Nao');
     end;
   finally
-    cxGrid.EndUpdate;
+    lvClientes.Items.EndUpdate;
   end;
 end;
 
 function TFrmCadCliente.ClienteSelecionado: TCliente;
 var
-  LView: TcxGridTableView;
   LIdx: Integer;
 begin
   Result := nil;
-  LView := cxGrid.Views[0] as TcxGridTableView;
-  LIdx := LView.DataController.FocusedRecordIndex;
+  if lvClientes.Selected = nil then Exit;
+  LIdx := lvClientes.Selected.Index;
   if (LIdx >= 0) and (LIdx < FClientes.Count) then
     Result := FClientes[LIdx];
 end;
@@ -166,11 +152,9 @@ var
   LSelecionado: TCliente;
 begin
   LSelecionado := ClienteSelecionado;
-  if LSelecionado = nil then
-    Exit;
+  if LSelecionado = nil then Exit;
   if MessageDlg(Format('Inativar o cliente %s?', [LSelecionado.Nome]),
-    mtConfirmation, [mbYes, mbNo], 0) <> mrYes then
-    Exit;
+    mtConfirmation, [mbYes, mbNo], 0) <> mrYes then Exit;
   try
     FService.Excluir(LSelecionado.Id);
     CarregarGrid;
@@ -185,7 +169,7 @@ begin
   Close;
 end;
 
-procedure TFrmCadCliente.edtFiltroPropertiesChange(Sender: TObject);
+procedure TFrmCadCliente.edtFiltroChange(Sender: TObject);
 begin
   CarregarGrid;
 end;

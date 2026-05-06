@@ -1,49 +1,49 @@
 unit uFrmCadVenda;
 
-{ ----------------------------------------------------------------------------
-  Cadastro de Venda. Forma agregadora: cabecalho + grid de itens.
-  Botao "Adicionar Item" abre lookup de produtos. Salvar dispara
-  Service.Salvar (que persiste + integra com financeiro em background).
-  ---------------------------------------------------------------------------- }
+{ Cadastro de Venda: cabecalho + grid de itens.
+  Salvar dispara Service.Salvar (persiste + integra com financeiro em background). }
 
 interface
 
 uses
   System.SysUtils, System.Classes, System.Generics.Collections,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls, Vcl.StdCtrls,
-  cxButtons, cxTextEdit, cxCurrencyEdit, cxDateEdit, cxLookupEdit,
-  cxGrid, cxGridLevel, cxGridCustomTableView, cxGridTableView, cxGridCustomView,
-  uVenda, uCliente, uProduto, uVendaService;
+  Vcl.ComCtrls,
+  uVenda, uCliente, uProduto, uVendaService, uClienteService, uProdutoService;
 
 type
   TFrmCadVenda = class(TForm)
     pnlCabecalho: TPanel;
     lblCliente: TLabel;
-    edtCliente: TcxLookupComboBox;
-    edtDataVenda: TcxDateEdit;
-    edtDesconto: TcxCurrencyEdit;
-    edtObservacoes: TcxTextEdit;
+    cmbCliente: TComboBox;
+    lblDataVenda: TLabel;
+    edtDataVenda: TDateTimePicker;
+    lblDesconto: TLabel;
+    edtDesconto: TEdit;
+    lblObservacoes: TLabel;
+    edtObservacoes: TEdit;
     pnlItens: TPanel;
-    cxGridItens: TcxGrid;
-    cxGridItensLevel: TcxGridLevel;
-    btnAddItem: TcxButton;
-    btnDelItem: TcxButton;
+    lvItens: TListView;
+    btnAddItem: TButton;
+    btnDelItem: TButton;
     pnlTotais: TPanel;
     lblTotal: TLabel;
     lblValorTotal: TLabel;
     pnlBotoes: TPanel;
-    btnSalvar: TcxButton;
-    btnCancelar: TcxButton;
+    btnSalvar: TButton;
+    btnCancelar: TButton;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure btnAddItemClick(Sender: TObject);
     procedure btnDelItemClick(Sender: TObject);
     procedure btnSalvarClick(Sender: TObject);
     procedure btnCancelarClick(Sender: TObject);
-    procedure edtDescontoPropertiesChange(Sender: TObject);
+    procedure edtDescontoChange(Sender: TObject);
   private
     FService: IVendaService;
     FProdutoService: IProdutoService;
+    FClienteService: IClienteService;
+    FClientes: TObjectList<TCliente>;
     FVenda: TVenda;
     procedure AtualizarTotais;
     procedure AtualizarGridItens;
@@ -59,12 +59,19 @@ implementation
 {$R *.dfm}
 
 uses
-  uConnection, uExceptions, uProdutoDAO, uProdutoService;
+  System.UITypes,
+  uConnection, uExceptions, uProdutoDAO, uClienteDAO;
 
 class procedure TFrmCadVenda.Listar(AService: IVendaService);
+var
+  LVenda: TVenda;
 begin
-  // Aqui abriria o form de listagem de vendas com grid.
-  // Mantido enxuto - a logica eh analoga aos demais cadastros.
+  LVenda := TVenda.Create;
+  try
+    Editar(AService, LVenda);
+  finally
+    LVenda.Free;
+  end;
 end;
 
 class procedure TFrmCadVenda.Editar(AService: IVendaService; AVenda: TVenda);
@@ -84,66 +91,84 @@ end;
 
 procedure TFrmCadVenda.FormCreate(Sender: TObject);
 var
-  LDAO: TProdutoDAO;
+  LProdDAO: TProdutoDAO;
+  LClienteDAO: TClienteDAO;
+  LCliente: TCliente;
 begin
   Caption := 'Venda';
-  if FVenda = nil then
-    FVenda := TVenda.Create;
-  // Servico de produto criado internamente para o lookup de itens
-  LDAO := TProdutoDAO.Create(TConnection.Instance.Conexao);
-  FProdutoService := TProdutoService.Create(LDAO, True);
+  LProdDAO := TProdutoDAO.Create(TConnection.Instance.Conexao);
+  FProdutoService := TProdutoService.Create(LProdDAO, True);
+
+  LClienteDAO := TClienteDAO.Create(TConnection.Instance.Conexao);
+  FClienteService := TClienteService.Create(LClienteDAO, True);
+  FClientes := FClienteService.Listar;
+
+  cmbCliente.Items.Clear;
+  for LCliente in FClientes do
+    cmbCliente.Items.Add(LCliente.Nome);
 end;
 
 procedure TFrmCadVenda.FormDestroy(Sender: TObject);
 begin
-  FreeAndNil(FVenda);
+  // FVenda nao eh de nossa propriedade - o chamador e responsavel por libera-lo.
+  FreeAndNil(FClientes);
   FService := nil;
   FProdutoService := nil;
+  FClienteService := nil;
 end;
 
 procedure TFrmCadVenda.CarregarVendaParaTela;
+var
+  I: Integer;
 begin
   if FVenda.Cliente <> nil then
-    edtCliente.EditValue := FVenda.Cliente.Id;
+    for I := 0 to FClientes.Count - 1 do
+      if FClientes[I].Id = FVenda.Cliente.Id then
+      begin
+        cmbCliente.ItemIndex := I;
+        Break;
+      end;
   edtDataVenda.Date := FVenda.DtVenda;
-  edtDesconto.Value := FVenda.Desconto;
+  edtDesconto.Text := FormatFloat('0.00', FVenda.Desconto);
   edtObservacoes.Text := FVenda.Observacoes;
   AtualizarTotais;
 end;
 
 procedure TFrmCadVenda.AplicarTelaParaVenda;
+var
+  LIdx: Integer;
 begin
+  LIdx := cmbCliente.ItemIndex;
+  if (LIdx >= 0) and (LIdx < FClientes.Count) then
+    FVenda.DefinirCliente(FClientes[LIdx], False);
   FVenda.DtVenda := edtDataVenda.Date;
-  FVenda.Desconto := edtDesconto.Value;
+  FVenda.Desconto := StrToCurrDef(edtDesconto.Text, 0);
   FVenda.Observacoes := edtObservacoes.Text;
   FVenda.Recalcular;
 end;
 
 procedure TFrmCadVenda.AtualizarGridItens;
 var
-  LView: TcxGridTableView;
   LItem: TVendaItem;
+  LLI: TListItem;
   I: Integer;
 begin
   if not Assigned(FVenda) then Exit;
-  LView := cxGridItens.Views[0] as TcxGridTableView;
-  cxGridItens.BeginUpdate;
+  lvItens.Items.BeginUpdate;
   try
-    // Indices correspondem as colunas do DFM: 0=#seq,1=Produto,
-    // 2=Quantidade,3=PrecoUnitario,4=ValorTotal
-    LView.DataController.RecordCount := 0;
-    LView.DataController.RecordCount := FVenda.Itens.Count;
+    lvItens.Items.Clear;
     for I := 0 to FVenda.Itens.Count - 1 do
     begin
       LItem := FVenda.Itens[I];
-      LView.DataController.Values[I, 0] := I + 1;
-      LView.DataController.Values[I, 1] := LItem.Produto.Descricao;
-      LView.DataController.Values[I, 2] := LItem.Quantidade;
-      LView.DataController.Values[I, 3] := LItem.PrecoUnitario;
-      LView.DataController.Values[I, 4] := LItem.ValorTotal;
+      LLI := lvItens.Items.Add;
+      LLI.Caption := IntToStr(I + 1);
+      LLI.SubItems.Add(LItem.Produto.Descricao);
+      LLI.SubItems.Add(FormatFloat('0.##', LItem.Quantidade));
+      LLI.SubItems.Add(FormatFloat('0.00', LItem.PrecoUnitario));
+      LLI.SubItems.Add(FormatFloat('0.00', LItem.ValorTotal));
     end;
   finally
-    cxGridItens.EndUpdate;
+    lvItens.Items.EndUpdate;
   end;
 end;
 
@@ -174,7 +199,6 @@ begin
       MessageDlg('Produto nao encontrado: ' + LCodigo, mtWarning, [mbOK], 0);
       Exit;
     end;
-    // Transfere posse para fora da lista antes de libera-la
     LLista.OwnsObjects := False;
     LProduto := LLista[0];
   finally
@@ -191,33 +215,31 @@ begin
   end;
 
   SPreco := InputBox('Adicionar Item',
-    Format('Preco unitario (padrao R$ %.2f):', [LProduto.PrecoVenda]),
+    Format('Preco unitario (padrao %.2f):', [LProduto.PrecoVenda]),
     FormatFloat('0.00', LProduto.PrecoVenda));
   if not TryStrToCurr(SPreco, LPreco) or (LPreco < 0) then
     LPreco := LProduto.PrecoVenda;
 
-  // FVenda assume posse do produto (AOwnsProduto=True)
   FVenda.AdicionarItem(LProduto, LQtd, LPreco, 0, True);
   AtualizarTotais;
 end;
 
 procedure TFrmCadVenda.btnDelItemClick(Sender: TObject);
 var
-  LView: TcxGridTableView;
   LIdx: Integer;
 begin
-  LView := cxGridItens.Views[0] as TcxGridTableView;
-  LIdx := LView.DataController.FocusedRecordIndex;
-  if LIdx < 0 then Exit;
+  if lvItens.Selected = nil then Exit;
+  LIdx := lvItens.Selected.Index;
   if MessageDlg('Remover item selecionado?', mtConfirmation,
     [mbYes, mbNo], 0) <> mrYes then Exit;
   FVenda.RemoverItem(LIdx);
   AtualizarTotais;
 end;
 
-procedure TFrmCadVenda.edtDescontoPropertiesChange(Sender: TObject);
+procedure TFrmCadVenda.edtDescontoChange(Sender: TObject);
 begin
-  FVenda.Desconto := edtDesconto.Value;
+  if not Assigned(FVenda) then Exit;
+  FVenda.Desconto := StrToCurrDef(edtDesconto.Text, 0);
   AtualizarTotais;
 end;
 

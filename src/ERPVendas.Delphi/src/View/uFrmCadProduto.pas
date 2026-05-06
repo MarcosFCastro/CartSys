@@ -7,28 +7,27 @@ interface
 uses
   System.SysUtils, System.Classes, System.Generics.Collections,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls,
-  cxButtons, cxTextEdit, cxGrid, cxGridLevel,
-  cxGridCustomTableView, cxGridTableView, cxGridCustomView,
+  Vcl.ComCtrls,
   uProduto, uProdutoService;
 
 type
   TFrmCadProduto = class(TForm)
     pnlFiltro: TPanel;
     lblFiltro: TLabel;
-    edtFiltro: TcxTextEdit;
-    cxGrid: TcxGrid;
-    cxGridLevel: TcxGridLevel;
+    edtFiltro: TEdit;
+    lvProdutos: TListView;
     pnlBotoes: TPanel;
-    btnNovo: TcxButton;
-    btnEditar: TcxButton;
-    btnExcluir: TcxButton;
-    btnFechar: TcxButton;
+    btnNovo: TButton;
+    btnEditar: TButton;
+    btnExcluir: TButton;
+    btnFechar: TButton;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure btnNovoClick(Sender: TObject);
     procedure btnEditarClick(Sender: TObject);
     procedure btnExcluirClick(Sender: TObject);
     procedure btnFecharClick(Sender: TObject);
+    procedure edtFiltroChange(Sender: TObject);
   private
     FService: IProdutoService;
     FProdutos: TObjectList<TProduto>;
@@ -43,6 +42,7 @@ implementation
 {$R *.dfm}
 
 uses
+  System.UITypes,
   uConnection, uProdutoDAO, uExceptions, uFrmCadProdutoEdit;
 
 class procedure TFrmCadProduto.Listar;
@@ -76,44 +76,39 @@ end;
 
 procedure TFrmCadProduto.CarregarGrid;
 var
-  LView: TcxGridTableView;
   LProduto: TProduto;
-  I: Integer;
-  LAtivoStr: string;
+  LItem: TListItem;
 begin
   FreeAndNil(FProdutos);
   FProdutos := FService.Listar(edtFiltro.Text);
 
-  LView := cxGrid.Views[0] as TcxGridTableView;
-  cxGrid.BeginUpdate;
+  lvProdutos.Items.BeginUpdate;
   try
-    // Indices: 0=Id,1=Codigo,2=Descricao,3=Unidade,4=PrecoVenda,5=Ativo
-    LView.DataController.RecordCount := 0;
-    LView.DataController.RecordCount := FProdutos.Count;
-    for I := 0 to FProdutos.Count - 1 do
+    lvProdutos.Items.Clear;
+    for LProduto in FProdutos do
     begin
-      LProduto := FProdutos[I];
-      if LProduto.Ativo then LAtivoStr := 'Sim' else LAtivoStr := 'Nao';
-      LView.DataController.Values[I, 0] := LProduto.Id;
-      LView.DataController.Values[I, 1] := LProduto.Codigo;
-      LView.DataController.Values[I, 2] := LProduto.Descricao;
-      LView.DataController.Values[I, 3] := LProduto.Unidade;
-      LView.DataController.Values[I, 4] := LProduto.PrecoVenda;
-      LView.DataController.Values[I, 5] := LAtivoStr;
+      LItem := lvProdutos.Items.Add;
+      LItem.Caption := LProduto.Codigo;
+      LItem.SubItems.Add(LProduto.Descricao);
+      LItem.SubItems.Add(LProduto.Unidade);
+      LItem.SubItems.Add(FormatFloat('0.00', LProduto.PrecoVenda));
+      if LProduto.Ativo then
+        LItem.SubItems.Add('Sim')
+      else
+        LItem.SubItems.Add('Nao');
     end;
   finally
-    cxGrid.EndUpdate;
+    lvProdutos.Items.EndUpdate;
   end;
 end;
 
 function TFrmCadProduto.ProdutoSelecionado: TProduto;
 var
-  LView: TcxGridTableView;
   LIdx: Integer;
 begin
   Result := nil;
-  LView := cxGrid.Views[0] as TcxGridTableView;
-  LIdx := LView.DataController.FocusedRecordIndex;
+  if lvProdutos.Selected = nil then Exit;
+  LIdx := lvProdutos.Selected.Index;
   if (LIdx >= 0) and (LIdx < FProdutos.Count) then
     Result := FProdutos[LIdx];
 end;
@@ -145,7 +140,7 @@ begin
   LSel := ProdutoSelecionado;
   if LSel = nil then Exit;
   if MessageDlg(Format('Inativar produto %s?', [LSel.Descricao]),
-    mtConfirmation, [mbYes, mbNo], 0) = mrYes then
+    mtConfirmation, [mbYes, mbNo], 0) <> mrYes then Exit;
   try
     FService.Excluir(LSel.Id);
     CarregarGrid;
@@ -158,6 +153,11 @@ end;
 procedure TFrmCadProduto.btnFecharClick(Sender: TObject);
 begin
   Close;
+end;
+
+procedure TFrmCadProduto.edtFiltroChange(Sender: TObject);
+begin
+  CarregarGrid;
 end;
 
 end.

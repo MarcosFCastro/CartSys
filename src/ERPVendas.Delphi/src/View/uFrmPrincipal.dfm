@@ -25,8 +25,6 @@ object FrmPrincipal: TFrmPrincipal
     Panels = <>
     SimplePanel = True
     SimpleText = 'Pronto.'
-    ExplicitTop = 530
-    ExplicitWidth = 900
   end
   object MainMenu: TMainMenu
     Left = 840

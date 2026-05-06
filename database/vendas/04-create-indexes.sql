@@ -1,9 +1,3 @@
-/* ============================================================================
-   ERP VENDAS - Indices secundarios
-   ============================================================================ */
-
-SET NAMES UTF8;
-CONNECT 'C:\CartSys\DB\ERP_VENDAS.FDB' USER 'SYSDBA' PASSWORD 'masterkey';
 
 CREATE INDEX IDX_CLIENTES_NOME       ON CLIENTES (NOME);
 CREATE INDEX IDX_PRODUTOS_DESCRICAO  ON PRODUTOS (DESCRICAO);

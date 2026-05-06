@@ -11,7 +11,7 @@ unit uRESTClient;
 interface
 
 uses
-  System.SysUtils, System.Classes, System.JSON,
+  System.SysUtils, System.Classes, System.JSON, System.TypInfo,
   REST.Client, REST.Types,
   uExceptions;
 
@@ -86,8 +86,6 @@ begin
   LRequest := TRESTRequest.Create(nil);
   try
     LCliente.BaseURL := FBaseUrl;
-    LCliente.ConnectTimeout := FTimeoutMs;
-    LCliente.ReadTimeout := FTimeoutMs;
 
     LRequest.Client := LCliente;
     LRequest.Response := LResponse;

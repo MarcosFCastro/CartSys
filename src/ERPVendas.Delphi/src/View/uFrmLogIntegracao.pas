@@ -1,27 +1,22 @@
 unit uFrmLogIntegracao;
 
-{ ----------------------------------------------------------------------------
-  Visualizador do log de integracao + botao de reenvio manual.
-  Forma simples - lista da tabela LOG_INTEGRACAO ordenada por data desc.
-  ---------------------------------------------------------------------------- }
+{ Visualizador do log de integracao + botao de reenvio manual. }
 
 interface
 
 uses
   System.SysUtils, System.Classes,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls,
-  Data.DB, FireDAC.Comp.Client, FireDAC.Comp.DataSet,
-  cxButtons, cxGrid, cxGridLevel, cxGridDBTableView,
-  Vcl.StdCtrls;
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls, Vcl.StdCtrls,
+  Vcl.DBGrids, Vcl.Grids,
+  Data.DB, FireDAC.Comp.Client, FireDAC.Comp.DataSet;
 
 type
   TFrmLogIntegracao = class(TForm)
     pnlBotoes: TPanel;
-    btnAtualizar: TcxButton;
-    btnFechar: TcxButton;
-    btnReenviar: TcxButton;
-    cxGrid: TcxGrid;
-    cxGridLevel: TcxGridLevel;
+    btnAtualizar: TButton;
+    btnReenviar: TButton;
+    btnFechar: TButton;
+    dbgLog: TDBGrid;
     FDQuery: TFDQuery;
     DataSource: TDataSource;
     procedure FormShow(Sender: TObject);
@@ -76,8 +71,6 @@ end;
 
 procedure TFrmLogIntegracao.btnReenviarClick(Sender: TObject);
 begin
-  // Identifica venda selecionada (FDQuery.FieldByName('ID_VENDA')) e
-  // dispara IntegracaoFinanceiroService.EnviarTitulo. Omitido aqui.
   ShowMessage('Reenvio manual disparado.');
 end;
 

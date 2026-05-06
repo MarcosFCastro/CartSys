@@ -9,7 +9,9 @@ uses
   Vcl.Forms,
   uFrmPrincipal in 'src\View\uFrmPrincipal.pas' {FrmPrincipal},
   uFrmCadCliente in 'src\View\uFrmCadCliente.pas' {FrmCadCliente},
+  uFrmCadClienteEdit in 'src\View\uFrmCadClienteEdit.pas' {FrmCadClienteEdit},
   uFrmCadProduto in 'src\View\uFrmCadProduto.pas' {FrmCadProduto},
+  uFrmCadProdutoEdit in 'src\View\uFrmCadProdutoEdit.pas' {FrmCadProdutoEdit},
   uFrmCadVenda in 'src\View\uFrmCadVenda.pas' {FrmCadVenda},
   uFrmLogIntegracao in 'src\View\uFrmLogIntegracao.pas' {FrmLogIntegracao},
 
@@ -35,7 +37,7 @@ uses
   uRESTClient in 'src\Infra\uRESTClient.pas',
   uRESTServer in 'src\Infra\uRESTServer.pas',
 
-  uRptPedido in 'src\Reports\uRptPedido.pas' {RptPedido: TDataModule};
+  uRptPedido in 'src\Reports\uRptPedido.pas';
 
 {$R *.res}
 

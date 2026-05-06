@@ -1,9 +1,3 @@
-/* ============================================================================
-   ERP VENDAS - Generators (sequences) e Triggers de auto-incremento
-   ============================================================================ */
-
-SET NAMES UTF8;
-CONNECT 'C:\CartSys\DB\ERP_VENDAS.FDB' USER 'SYSDBA' PASSWORD 'masterkey';
 
 CREATE SEQUENCE SEQ_CLIENTES;
 CREATE SEQUENCE SEQ_PRODUTOS;
@@ -79,4 +73,3 @@ END^
 
 SET TERM ; ^
 
-COMMIT WORK;

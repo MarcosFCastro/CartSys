@@ -1,33 +1,3 @@
-/* ============================================================================
-   ERP VENDAS - Tabelas
-   ============================================================================ */
-
-SET NAMES UTF8;
-CONNECT 'C:\CartSys\DB\ERP_VENDAS.FDB' USER 'SYSDBA' PASSWORD 'masterkey';
-
-/* ----------------------------------------------------------------------------
-   CLIENTES
-   ---------------------------------------------------------------------------- */
-CREATE TABLE CLIENTES (
-    ID            INTEGER       NOT NULL,
-    NOME          VARCHAR(120)  NOT NULL,
-    CPF_CNPJ      VARCHAR(20)   NOT NULL,
-    EMAIL         VARCHAR(120),
-    TELEFONE      VARCHAR(20),
-    ENDERECO      VARCHAR(200),
-    CIDADE        VARCHAR(80),
-    UF            CHAR(2),
-    CEP           VARCHAR(10),
-    ATIVO         CHAR(1)       DEFAULT 'S' NOT NULL,
-    DT_CADASTRO   TIMESTAMP     DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    DT_ALTERACAO  TIMESTAMP,
-    CONSTRAINT PK_CLIENTES        PRIMARY KEY (ID),
-    CONSTRAINT UQ_CLIENTES_DOC    UNIQUE (CPF_CNPJ),
-    CONSTRAINT CK_CLIENTES_ATIVO  CHECK (ATIVO IN ('S','N'))
-);
-
-COMMENT ON TABLE CLIENTES IS 'Cadastro de clientes do ERP de Vendas';
-COMMENT ON COLUMN CLIENTES.ATIVO IS 'S = Ativo, N = Inativo (soft delete)';
 
 /* ----------------------------------------------------------------------------
    PRODUTOS
@@ -115,4 +85,4 @@ CREATE TABLE LOG_INTEGRACAO (
     CONSTRAINT CK_LOG_SUCESSO       CHECK (SUCESSO IN ('S','N'))
 );
 
-COMMIT WORK;
+

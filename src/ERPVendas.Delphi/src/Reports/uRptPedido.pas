@@ -1,99 +1,130 @@
 unit uRptPedido;
 
-{ ----------------------------------------------------------------------------
-  Relatorio de Confirmacao de Pedido com ReportBuilder.
-  Layout: cabecalho com dados da empresa, dados do cliente, tabela de itens,
-  totais, observacoes e rodape. Gera PDF via ppDevicePDF.
-  ---------------------------------------------------------------------------- }
+{ Relatorio de pedido gerado como HTML (sem dependencia de ReportBuilder).
+  O arquivo .html e gravado no diretorio temporario e pode ser anexado
+  a e-mails ou aberto no navegador padrao. }
 
 interface
 
 uses
-  System.SysUtils, System.Classes,
-  Data.DB, FireDAC.Comp.Client, FireDAC.Comp.DataSet,
-  ppDB, ppDBPipe, ppReport, ppClass, ppDevice, ppPDFDevice,
+  System.SysUtils, System.Classes, System.IOUtils,
+  FireDAC.Comp.Client,
   uVenda;
 
 type
-  TRptPedido = class(TDataModule)
-    Report: TppReport;
-    QryCabecalho: TFDQuery;
-    QryItens: TFDQuery;
-    PipeCabecalho: TppDBPipeline;
-    PipeItens: TppDBPipeline;
-    DSCabecalho: TDataSource;
-    DSItens: TDataSource;
+  TRptPedido = class
   private
-    procedure CarregarDadosVenda(AVenda: TVenda; AConexao: TFDConnection);
+    function GerarHtml(AVenda: TVenda): string;
   public
-    { Gera o relatorio em PDF e retorna o caminho do arquivo gravado.
-      AConexao deve ser uma conexao exclusiva da thread chamadora. }
+    { Gera o relatorio em HTML e retorna o caminho do arquivo gravado. }
     function GerarPdf(AVenda: TVenda; const ACaminhoSaida: string;
       AConexao: TFDConnection): string;
-    { Mostra o preview do relatorio a partir da UI (usa conexao principal). }
+    { Abre o relatorio no navegador padrao (preview). }
     procedure Visualizar(AVenda: TVenda);
   end;
 
 implementation
 
-{$R *.dfm}
-
 uses
-  uConnection;
+  Winapi.ShellAPI, Winapi.Windows;
 
 { TRptPedido }
 
-procedure TRptPedido.CarregarDadosVenda(AVenda: TVenda; AConexao: TFDConnection);
+function TRptPedido.GerarHtml(AVenda: TVenda): string;
+var
+  LSb: TStringBuilder;
+  LItem: TVendaItem;
 begin
-  QryCabecalho.Connection := AConexao;
-  QryItens.Connection := AConexao;
+  LSb := TStringBuilder.Create;
+  try
+    LSb.AppendLine('<!DOCTYPE html><html><head>');
+    LSb.AppendLine('<meta charset="utf-8">');
+    LSb.AppendLine('<title>Pedido</title>');
+    LSb.AppendLine('<style>');
+    LSb.AppendLine('  body { font-family: Arial, sans-serif; margin: 30px; color: #333; }');
+    LSb.AppendLine('  h2 { color: #444; border-bottom: 2px solid #ccc; padding-bottom: 6px; }');
+    LSb.AppendLine('  table { border-collapse: collapse; width: 100%; margin-top: 12px; }');
+    LSb.AppendLine('  th, td { border: 1px solid #ccc; padding: 6px 10px; }');
+    LSb.AppendLine('  th { background: #f0f0f0; text-align: left; }');
+    LSb.AppendLine('  td.num { text-align: right; }');
+    LSb.AppendLine('  .totais { margin-top: 14px; font-size: 1.05em; }');
+    LSb.AppendLine('  .totais b { display: inline-block; width: 160px; }');
+    LSb.AppendLine('</style></head><body>');
 
-  QryCabecalho.Close;
-  QryCabecalho.SQL.Text :=
-    'SELECT V.NUMERO, V.DT_VENDA, V.VALOR_TOTAL, V.DESCONTO, V.VALOR_LIQUIDO, ' +
-    '       V.STATUS, V.OBSERVACOES, ' +
-    '       C.NOME, C.CPF_CNPJ, C.EMAIL, C.TELEFONE, C.ENDERECO, C.CIDADE, ' +
-    '       C.UF, C.CEP ' +
-    'FROM VENDAS V ' +
-    'INNER JOIN CLIENTES C ON C.ID = V.ID_CLIENTE ' +
-    'WHERE V.ID = :ID';
-  QryCabecalho.ParamByName('ID').AsInteger := AVenda.Id;
-  QryCabecalho.Open;
+    LSb.AppendLine('<h2>CartSys &mdash; Relat&oacute;rio de Pedido</h2>');
+    LSb.AppendFormat('<p><b>Pedido N&ordm;:</b> %d &nbsp;&nbsp; ' +
+      '<b>Data:</b> %s</p>' + sLineBreak,
+      [AVenda.Numero, FormatDateTime('dd/mm/yyyy', AVenda.DtVenda)]);
 
-  QryItens.Close;
-  QryItens.SQL.Text :=
-    'SELECT VI.QUANTIDADE, VI.PRECO_UNITARIO, VI.DESCONTO, VI.VALOR_TOTAL, ' +
-    '       P.CODIGO, P.DESCRICAO, P.UNIDADE ' +
-    'FROM VENDAS_ITENS VI ' +
-    'INNER JOIN PRODUTOS P ON P.ID = VI.ID_PRODUTO ' +
-    'WHERE VI.ID_VENDA = :ID ORDER BY VI.ID';
-  QryItens.ParamByName('ID').AsInteger := AVenda.Id;
-  QryItens.Open;
+    if Assigned(AVenda.Cliente) then
+    begin
+      LSb.AppendLine('<h3>Cliente</h3><p>');
+      LSb.AppendFormat('<b>Nome:</b> %s<br>' + sLineBreak, [AVenda.Cliente.Nome]);
+      LSb.AppendFormat('<b>CPF/CNPJ:</b> %s<br>' + sLineBreak, [AVenda.Cliente.CpfCnpj]);
+      LSb.AppendFormat('<b>E-mail:</b> %s</p>' + sLineBreak, [AVenda.Cliente.Email]);
+    end;
+
+    LSb.AppendLine('<h3>Itens</h3>');
+    LSb.AppendLine('<table><tr><th>#</th><th>Produto</th>' +
+      '<th>Qtd</th><th>Pre&ccedil;o Unit.</th><th>Total</th></tr>');
+    for LItem in AVenda.Itens do
+      LSb.AppendFormat(
+        '<tr><td class="num">%s</td><td>%s</td>' +
+        '<td class="num">%s</td><td class="num">R$ %.2f</td>' +
+        '<td class="num">R$ %.2f</td></tr>' + sLineBreak,
+        [LItem.Produto.Codigo, LItem.Produto.Descricao,
+         FormatFloat('0.##', LItem.Quantidade),
+         LItem.PrecoUnitario, LItem.ValorTotal]);
+    LSb.AppendLine('</table>');
+
+    LSb.AppendLine('<div class="totais">');
+    LSb.AppendFormat('<p><b>Valor bruto:</b> R$ %.2f<br>' + sLineBreak, [AVenda.ValorTotal]);
+    LSb.AppendFormat('<b>Desconto:</b> R$ %.2f<br>' + sLineBreak, [AVenda.Desconto]);
+    LSb.AppendFormat('<b>Valor l&iacute;quido:</b> R$ %.2f</p></div>' + sLineBreak,
+      [AVenda.ValorLiquido]);
+
+    if Trim(AVenda.Observacoes) <> '' then
+      LSb.AppendFormat('<p><b>Observa&ccedil;&otilde;es:</b> %s</p>' + sLineBreak,
+        [AVenda.Observacoes]);
+
+    LSb.AppendLine('<hr><p><small>CartSys ERP Vendas</small></p>');
+    LSb.AppendLine('</body></html>');
+    Result := LSb.ToString;
+  finally
+    LSb.Free;
+  end;
 end;
 
 function TRptPedido.GerarPdf(AVenda: TVenda; const ACaminhoSaida: string;
   AConexao: TFDConnection): string;
 var
-  LDevice: TppPDFDevice;
+  LCaminhoHtml: string;
+  LWriter: TStreamWriter;
 begin
-  CarregarDadosVenda(AVenda, AConexao);
-  LDevice := TppPDFDevice.Create(nil);
+  LCaminhoHtml := ChangeFileExt(ACaminhoSaida, '.html');
+  LWriter := TStreamWriter.Create(LCaminhoHtml, False, TEncoding.UTF8);
   try
-    LDevice.Publisher := Report.Publisher;
-    LDevice.FileName := ACaminhoSaida;
-    LDevice.PDFSettings.OpenPDFFile := False;
-    Report.PrintToDevices;
-    Result := ACaminhoSaida;
+    LWriter.Write(GerarHtml(AVenda));
   finally
-    LDevice.Free;
+    LWriter.Free;
   end;
+  Result := LCaminhoHtml;
 end;
 
 procedure TRptPedido.Visualizar(AVenda: TVenda);
+var
+  LCaminhoHtml: string;
+  LWriter: TStreamWriter;
 begin
-  CarregarDadosVenda(AVenda, TConnection.Instance.Conexao);
-  Report.ShowPrintDialog := False;
-  Report.Print;
+  LCaminhoHtml := TPath.Combine(TPath.GetTempPath,
+    Format('Pedido_%d_preview.html', [AVenda.Numero]));
+  LWriter := TStreamWriter.Create(LCaminhoHtml, False, TEncoding.UTF8);
+  try
+    LWriter.Write(GerarHtml(AVenda));
+  finally
+    LWriter.Free;
+  end;
+  ShellExecute(0, 'open', PChar(LCaminhoHtml), nil, nil, SW_SHOWNORMAL);
 end;
 
 end.

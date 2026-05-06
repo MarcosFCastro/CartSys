@@ -100,45 +100,54 @@ begin
       LVenda: TVenda;
       LResultado: TResultadoIntegracao;
     begin
-      // Conexao propria para a thread
-      LConexao := TConnection.Instance.NovaConexao;
       try
-        LDAO := TVendaDAO.Create(LConexao);
-        LIntegracao := TIntegracaoFinanceiroService.Create(LConexao);
+        LConexao := TConnection.Instance.NovaConexao;
         try
-          LVenda := LDAO.BuscarPorId(AIdVenda);
-          if LVenda = nil then
-          begin
-            TLogger.Instance.Error(
-              'Venda %d nao encontrada para envio ao financeiro', [AIdVenda]);
-            Exit;
-          end;
+          LDAO := TVendaDAO.Create(LConexao);
           try
-            LResultado := LIntegracao.EnviarTitulo(LVenda);
-            if LResultado.Sucesso then
-              TLogger.Instance.Info(
-                'Titulo da venda %d criado no financeiro (id %d)',
-                [AIdVenda, LResultado.IdTituloFinanceiro])
-            else
-              TLogger.Instance.Warn(
-                'Integracao da venda %d com falha: %s',
-                [AIdVenda, LResultado.MensagemErro]);
+            LIntegracao := TIntegracaoFinanceiroService.Create(LConexao);
+            try
+              LVenda := LDAO.BuscarPorId(AIdVenda);
+              if LVenda = nil then
+              begin
+                TLogger.Instance.Error(
+                  'Venda %d nao encontrada para envio ao financeiro', [AIdVenda]);
+                Exit;
+              end;
+              try
+                LResultado := LIntegracao.EnviarTitulo(LVenda);
+                if LResultado.Sucesso then
+                  TLogger.Instance.Info(
+                    'Titulo da venda %d criado no financeiro (id %d)',
+                    [AIdVenda, LResultado.IdTituloFinanceiro])
+                else
+                  TLogger.Instance.Warn(
+                    'Integracao da venda %d com falha: %s',
+                    [AIdVenda, LResultado.MensagemErro]);
 
-            if Assigned(FOnIntegracaoConcluida) then
-              TThread.Queue(nil,
-                procedure
-                begin
-                  FOnIntegracaoConcluida(AIdVenda, LResultado.MensagemErro);
-                end);
+                if Assigned(FOnIntegracaoConcluida) then
+                  TThread.Queue(nil,
+                    procedure
+                    begin
+                      FOnIntegracaoConcluida(AIdVenda, LResultado.MensagemErro);
+                    end);
+              finally
+                LVenda.Free;
+              end;
+            finally
+              LIntegracao.Free;
+            end;
           finally
-            LVenda.Free;
+            LDAO.Free;
           end;
         finally
-          LIntegracao.Free;
-          LDAO.Free;
+          LConexao.Free;
         end;
-      finally
-        LConexao.Free;
+      except
+        on E: Exception do
+          TLogger.Instance.Error(
+            'Falha assincrona ao enviar titulo venda %d: %s',
+            [AIdVenda, E.Message]);
       end;
     end);
 end;
@@ -146,22 +155,36 @@ end;
 procedure TVendaService.ProcessarQuitacao(AIdVenda: Integer; ADtQuitacao: TDateTime;
   const AFormaPagamento: string);
 var
+  LConexao: TFDConnection;
+  LDAO: TVendaDAO;
   LVenda: TVenda;
 begin
-  LVenda := FDAO.BuscarPorId(AIdVenda);
-  if LVenda = nil then
-    raise ENotFoundException.CreateFmt('Venda %d nao encontrada.', [AIdVenda]);
+  // Conexao propria: este metodo e chamado da thread Indy (REST callback),
+  // nao pode usar FConexao que pertence a thread principal.
+  LConexao := TConnection.Instance.NovaConexao;
   try
-    if not LVenda.PodeQuitar then
-      raise EBusinessException.CreateFmt(
-        'Venda %d nao pode ser quitada (status atual: %s).',
-        [AIdVenda, LVenda.Status.ToString]);
+    LDAO := TVendaDAO.Create(LConexao);
+    try
+      LVenda := LDAO.BuscarPorId(AIdVenda);
+      if LVenda = nil then
+        raise ENotFoundException.CreateFmt('Venda %d nao encontrada.', [AIdVenda]);
+      try
+        if not LVenda.PodeQuitar then
+          raise EBusinessException.CreateFmt(
+            'Venda %d nao pode ser quitada (status atual: %s).',
+            [AIdVenda, LVenda.Status.ToString]);
 
-    FDAO.AtualizarQuitacao(AIdVenda, ADtQuitacao);
-    TLogger.Instance.Info(
-      'Venda %d quitada (forma: %s)', [AIdVenda, AFormaPagamento]);
+        LDAO.AtualizarQuitacao(AIdVenda, ADtQuitacao);
+        TLogger.Instance.Info(
+          'Venda %d quitada (forma: %s)', [AIdVenda, AFormaPagamento]);
+      finally
+        LVenda.Free;
+      end;
+    finally
+      LDAO.Free;
+    end;
   finally
-    LVenda.Free;
+    LConexao.Free;
   end;
 
   // Pos-quitacao: gera PDF e envia por e-mail (em background)
@@ -179,22 +202,35 @@ end;
 
 procedure TVendaService.ProcessarCancelamento(AIdVenda: Integer; const AMotivo: string);
 var
+  LConexao: TFDConnection;
+  LDAO: TVendaDAO;
   LVenda: TVenda;
 begin
-  LVenda := FDAO.BuscarPorId(AIdVenda);
-  if LVenda = nil then
-    raise ENotFoundException.CreateFmt('Venda %d nao encontrada.', [AIdVenda]);
+  // Conexao propria: chamado da thread Indy (REST callback).
+  LConexao := TConnection.Instance.NovaConexao;
   try
-    if not LVenda.PodeCancelar then
-      raise EBusinessException.CreateFmt(
-        'Venda %d nao pode ser cancelada (status atual: %s).',
-        [AIdVenda, LVenda.Status.ToString]);
+    LDAO := TVendaDAO.Create(LConexao);
+    try
+      LVenda := LDAO.BuscarPorId(AIdVenda);
+      if LVenda = nil then
+        raise ENotFoundException.CreateFmt('Venda %d nao encontrada.', [AIdVenda]);
+      try
+        if not LVenda.PodeCancelar then
+          raise EBusinessException.CreateFmt(
+            'Venda %d nao pode ser cancelada (status atual: %s).',
+            [AIdVenda, LVenda.Status.ToString]);
 
-    FDAO.AtualizarCancelamento(AIdVenda, Now);
-    TLogger.Instance.Info(
-      'Venda %d cancelada. Motivo: %s', [AIdVenda, AMotivo]);
+        LDAO.AtualizarCancelamento(AIdVenda, Now);
+        TLogger.Instance.Info(
+          'Venda %d cancelada. Motivo: %s', [AIdVenda, AMotivo]);
+      finally
+        LVenda.Free;
+      end;
+    finally
+      LDAO.Free;
+    end;
   finally
-    LVenda.Free;
+    LConexao.Free;
   end;
 end;
 
@@ -270,7 +306,7 @@ begin
           Format('Pedido_%d.pdf', [LVenda.Numero]));
 
         // Gera PDF via ReportBuilder usando a conexao exclusiva desta thread
-        LRpt := TRptPedido.Create(nil);
+        LRpt := TRptPedido.Create;
         try
           LCaminhoPdf := LRpt.GerarPdf(LVenda, LCaminhoPdf, LConexao);
           TLogger.Instance.Info(

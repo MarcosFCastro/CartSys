@@ -3,7 +3,7 @@ unit uLogIntegracaoDAO;
 interface
 
 uses
-  System.SysUtils, FireDAC.Comp.Client;
+  System.SysUtils, FireDAC.Comp.Client, FireDAC.Stan.Param;
 
 type
   TLogIntegracaoDAO = class

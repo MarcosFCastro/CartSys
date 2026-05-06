@@ -8,32 +8,31 @@ interface
 uses
   System.SysUtils, System.Classes,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls,
-  cxButtons, cxTextEdit, cxCheckBox,
   uCliente, uClienteService;
 
 type
   TFrmCadClienteEdit = class(TForm)
     pnlBotoes: TPanel;
-    btnSalvar: TcxButton;
-    btnCancelar: TcxButton;
+    btnSalvar: TButton;
+    btnCancelar: TButton;
     pnlCampos: TPanel;
     lblNome: TLabel;
-    edtNome: TcxTextEdit;
+    edtNome: TEdit;
     lblCpfCnpj: TLabel;
-    edtCpfCnpj: TcxTextEdit;
+    edtCpfCnpj: TEdit;
     lblEmail: TLabel;
-    edtEmail: TcxTextEdit;
+    edtEmail: TEdit;
     lblTelefone: TLabel;
-    edtTelefone: TcxTextEdit;
+    edtTelefone: TEdit;
     lblEndereco: TLabel;
-    edtEndereco: TcxTextEdit;
+    edtEndereco: TEdit;
     lblCidade: TLabel;
-    edtCidade: TcxTextEdit;
+    edtCidade: TEdit;
     lblUf: TLabel;
-    edtUf: TcxTextEdit;
+    edtUf: TEdit;
     lblCep: TLabel;
-    edtCep: TcxTextEdit;
-    chkAtivo: TcxCheckBox;
+    edtCep: TEdit;
+    chkAtivo: TCheckBox;
     procedure FormCreate(Sender: TObject);
     procedure btnSalvarClick(Sender: TObject);
     procedure btnCancelarClick(Sender: TObject);
@@ -51,6 +50,7 @@ implementation
 {$R *.dfm}
 
 uses
+  System.UITypes,
   uExceptions;
 
 class function TFrmCadClienteEdit.Editar(AService: IClienteService;

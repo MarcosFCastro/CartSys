@@ -20,8 +20,8 @@ type
   strict private
     class var FInstance: TConnection;
     class var FLock: TCriticalSection;
-
-    FDriverLink: TFDPhysFBDriverLink;
+    var
+      FDriverLink: TFDPhysFBDriverLink;
     FWaitCursor: TFDGUIxWaitCursor;
     FConnection: TFDConnection;
 

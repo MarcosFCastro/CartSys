@@ -17,7 +17,8 @@ type
   strict private
     class var FInstance: TLogger;
     class var FLock: TCriticalSection;
-    FNivelMinimo: TLogLevel;
+    var
+      FNivelMinimo: TLogLevel;
 
     constructor CreatePrivate;
     function NomeArquivoDoDia: string;

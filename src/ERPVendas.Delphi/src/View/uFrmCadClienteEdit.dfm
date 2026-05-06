@@ -23,20 +23,22 @@ object FrmCadClienteEdit: TFrmCadClienteEdit
     Align = alBottom
     BevelOuter = bvNone
     TabOrder = 0
-    object btnSalvar: TcxButton
+    object btnSalvar: TButton
       Left = 320
       Top = 8
       Width = 80
       Height = 28
       Caption = 'Salvar'
+      Default = True
       TabOrder = 0
       OnClick = btnSalvarClick
     end
-    object btnCancelar: TcxButton
+    object btnCancelar: TButton
       Left = 408
       Top = 8
       Width = 80
       Height = 28
+      Cancel = True
       Caption = 'Cancelar'
       TabOrder = 1
       OnClick = btnCancelarClick
@@ -57,7 +59,7 @@ object FrmCadClienteEdit: TFrmCadClienteEdit
       Height = 13
       Caption = 'Nome:'
     end
-    object edtNome: TcxTextEdit
+    object edtNome: TEdit
       Left = 124
       Top = 10
       Width = 356
@@ -71,7 +73,7 @@ object FrmCadClienteEdit: TFrmCadClienteEdit
       Height = 13
       Caption = 'CPF/CNPJ:'
     end
-    object edtCpfCnpj: TcxTextEdit
+    object edtCpfCnpj: TEdit
       Left = 124
       Top = 42
       Width = 200
@@ -85,7 +87,7 @@ object FrmCadClienteEdit: TFrmCadClienteEdit
       Height = 13
       Caption = 'E-mail:'
     end
-    object edtEmail: TcxTextEdit
+    object edtEmail: TEdit
       Left = 124
       Top = 74
       Width = 356
@@ -99,7 +101,7 @@ object FrmCadClienteEdit: TFrmCadClienteEdit
       Height = 13
       Caption = 'Telefone:'
     end
-    object edtTelefone: TcxTextEdit
+    object edtTelefone: TEdit
       Left = 124
       Top = 106
       Width = 150
@@ -113,7 +115,7 @@ object FrmCadClienteEdit: TFrmCadClienteEdit
       Height = 13
       Caption = 'Endereco:'
     end
-    object edtEndereco: TcxTextEdit
+    object edtEndereco: TEdit
       Left = 124
       Top = 138
       Width = 356
@@ -127,7 +129,7 @@ object FrmCadClienteEdit: TFrmCadClienteEdit
       Height = 13
       Caption = 'Cidade:'
     end
-    object edtCidade: TcxTextEdit
+    object edtCidade: TEdit
       Left = 124
       Top = 170
       Width = 196
@@ -141,15 +143,13 @@ object FrmCadClienteEdit: TFrmCadClienteEdit
       Height = 13
       Caption = 'UF:'
     end
-    object edtUf: TcxTextEdit
+    object edtUf: TEdit
       Left = 348
       Top = 170
       Width = 50
       Height = 21
+      MaxLength = 2
       TabOrder = 6
-      object edtUf.Properties: TcxTextEditProperties
-        MaxLength = 2
-      end
     end
     object lblCep: TLabel
       Left = 16
@@ -158,14 +158,14 @@ object FrmCadClienteEdit: TFrmCadClienteEdit
       Height = 13
       Caption = 'CEP:'
     end
-    object edtCep: TcxTextEdit
+    object edtCep: TEdit
       Left = 124
       Top = 202
       Width = 120
       Height = 21
       TabOrder = 7
     end
-    object chkAtivo: TcxCheckBox
+    object chkAtivo: TCheckBox
       Left = 124
       Top = 236
       Width = 60

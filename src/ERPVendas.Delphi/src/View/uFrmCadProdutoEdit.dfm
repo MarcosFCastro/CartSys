@@ -23,20 +23,22 @@ object FrmCadProdutoEdit: TFrmCadProdutoEdit
     Align = alBottom
     BevelOuter = bvNone
     TabOrder = 0
-    object btnSalvar: TcxButton
+    object btnSalvar: TButton
       Left = 240
       Top = 8
       Width = 80
       Height = 28
       Caption = 'Salvar'
+      Default = True
       TabOrder = 0
       OnClick = btnSalvarClick
     end
-    object btnCancelar: TcxButton
+    object btnCancelar: TButton
       Left = 328
       Top = 8
       Width = 80
       Height = 28
+      Cancel = True
       Caption = 'Cancelar'
       TabOrder = 1
       OnClick = btnCancelarClick
@@ -57,7 +59,7 @@ object FrmCadProdutoEdit: TFrmCadProdutoEdit
       Height = 13
       Caption = 'Codigo:'
     end
-    object edtCodigo: TcxTextEdit
+    object edtCodigo: TEdit
       Left = 124
       Top = 10
       Width = 120
@@ -71,7 +73,7 @@ object FrmCadProdutoEdit: TFrmCadProdutoEdit
       Height = 13
       Caption = 'Descricao:'
     end
-    object edtDescricao: TcxTextEdit
+    object edtDescricao: TEdit
       Left = 124
       Top = 42
       Width = 276
@@ -85,15 +87,13 @@ object FrmCadProdutoEdit: TFrmCadProdutoEdit
       Height = 13
       Caption = 'Unidade:'
     end
-    object edtUnidade: TcxTextEdit
+    object edtUnidade: TEdit
       Left = 124
       Top = 74
       Width = 60
       Height = 21
+      MaxLength = 6
       TabOrder = 2
-      object edtUnidade.Properties: TcxTextEditProperties
-        MaxLength = 6
-      end
     end
     object lblPrecoVenda: TLabel
       Left = 16
@@ -102,7 +102,7 @@ object FrmCadProdutoEdit: TFrmCadProdutoEdit
       Height = 13
       Caption = 'Preco Venda:'
     end
-    object edtPrecoVenda: TcxCurrencyEdit
+    object edtPrecoVenda: TEdit
       Left = 124
       Top = 106
       Width = 120
@@ -116,14 +116,14 @@ object FrmCadProdutoEdit: TFrmCadProdutoEdit
       Height = 13
       Caption = 'Estoque:'
     end
-    object edtEstoque: TcxCurrencyEdit
+    object edtEstoque: TEdit
       Left = 124
       Top = 138
       Width = 120
       Height = 21
       TabOrder = 4
     end
-    object chkAtivo: TcxCheckBox
+    object chkAtivo: TCheckBox
       Left = 124
       Top = 172
       Width = 60

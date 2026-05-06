@@ -3,8 +3,8 @@ unit uRESTServer;
 { ----------------------------------------------------------------------------
   Servidor HTTP embarcado usando Indy (TIdHTTPServer).
   Expoe os endpoints de callback chamados pelo ERP Financeiro:
-    POST /api/v1/vendas/{id}/notificar-quitacao
-    POST /api/v1/vendas/{id}/notificar-cancelamento
+    POST /api/v1/vendas/[id]/notificar-quitacao
+    POST /api/v1/vendas/[id]/notificar-cancelamento
     GET  /api/v1/health
 
   Validacao da X-API-Key em todas as chamadas.
@@ -159,8 +159,19 @@ var
   LDt: TDateTime;
   LForma: string;
   LValor: TJSONValue;
+  LReader: TStreamReader;
 begin
-  LBody := ARequest.PostStream.ReadString;
+  LBody := '';
+  if Assigned(ARequest.PostStream) then
+  begin
+    ARequest.PostStream.Position := 0;
+    LReader := TStreamReader.Create(ARequest.PostStream, TEncoding.UTF8, False);
+    try
+      LBody := LReader.ReadToEnd;
+    finally
+      LReader.Free;
+    end;
+  end;
   LJson := TJSONObject.ParseJSONValue(LBody) as TJSONObject;
   if LJson = nil then
   begin
@@ -191,8 +202,19 @@ var
   LBody, LMotivo: string;
   LJson: TJSONObject;
   LValor: TJSONValue;
+  LReader: TStreamReader;
 begin
-  LBody := ARequest.PostStream.ReadString;
+  LBody := '';
+  if Assigned(ARequest.PostStream) then
+  begin
+    ARequest.PostStream.Position := 0;
+    LReader := TStreamReader.Create(ARequest.PostStream, TEncoding.UTF8, False);
+    try
+      LBody := LReader.ReadToEnd;
+    finally
+      LReader.Free;
+    end;
+  end;
   LJson := TJSONObject.ParseJSONValue(LBody) as TJSONObject;
   LMotivo := '';
   if Assigned(LJson) then

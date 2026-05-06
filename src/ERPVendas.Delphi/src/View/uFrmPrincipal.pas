@@ -10,8 +10,7 @@ interface
 uses
   System.SysUtils, System.Classes,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.Menus, Vcl.ExtCtrls, Vcl.StdCtrls,
-  cxClasses, cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters,
-  dxRibbon, dxBar, dxRibbonForm,
+  Vcl.ComCtrls,
   uVendaService, uRESTServer;
 
 type
@@ -52,6 +51,7 @@ implementation
 {$R *.dfm}
 
 uses
+  System.UITypes,
   uConnection, uConfig, uLogger,
   uFrmCadCliente, uFrmCadProduto, uFrmCadVenda, uFrmLogIntegracao;
 

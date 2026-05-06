@@ -51,43 +51,37 @@ object FrmCadVenda: TFrmCadVenda
       Height = 15
       Caption = 'Observa'#231#245'es:'
     end
-    object edtCliente: TcxLookupComboBox
+    object cmbCliente: TComboBox
       Left = 60
       Top = 10
       Width = 340
-      Height = 22
+      Height = 23
+      Style = csDropDownList
       TabOrder = 0
-      object edtCliente.Properties: TcxLookupComboBoxProperties
-        ListColumns = <>
-        ListSource = nil
-      end
     end
-    object edtDataVenda: TcxDateEdit
+    object edtDataVenda: TDateTimePicker
       Left = 456
       Top = 10
       Width = 120
-      Height = 22
+      Height = 23
+      Date = 40000.000000000000000000
+      Time = 40000.000000000000000000
       TabOrder = 1
-      object edtDataVenda.Properties: TcxDateEditProperties
-        Kind = ckDate
-      end
     end
-    object edtDesconto: TcxCurrencyEdit
+    object edtDesconto: TEdit
       Left = 72
       Top = 46
       Width = 120
-      Height = 22
+      Height = 23
       TabOrder = 2
-      object edtDesconto.Properties: TcxCurrencyEditProperties
-        Alignment.Horz = taRightJustify
-        OnChange = edtDescontoPropertiesChange
-      end
+      Text = '0.00'
+      OnChange = edtDescontoChange
     end
-    object edtObservacoes: TcxTextEdit
+    object edtObservacoes: TEdit
       Left = 88
       Top = 78
       Width = 500
-      Height = 22
+      Height = 23
       Anchors = [akLeft, akTop, akRight]
       TabOrder = 3
     end
@@ -100,9 +94,7 @@ object FrmCadVenda: TFrmCadVenda
     Align = alBottom
     BevelOuter = bvNone
     TabOrder = 1
-    ExplicitTop = 596
-    ExplicitWidth = 900
-    object btnSalvar: TcxButton
+    object btnSalvar: TButton
       Left = 700
       Top = 8
       Width = 88
@@ -113,14 +105,14 @@ object FrmCadVenda: TFrmCadVenda
       TabOrder = 0
       OnClick = btnSalvarClick
     end
-    object btnCancelar: TcxButton
+    object btnCancelar: TButton
       Left = 796
       Top = 8
       Width = 96
       Height = 28
       Anchors = [akTop, akRight]
-      Caption = '&Cancelar'
       Cancel = True
+      Caption = '&Cancelar'
       TabOrder = 1
       OnClick = btnCancelarClick
     end
@@ -133,9 +125,8 @@ object FrmCadVenda: TFrmCadVenda
     Align = alBottom
     BevelOuter = bvNone
     Color = $00F0F0F0
+    ParentBackground = False
     TabOrder = 2
-    ExplicitTop = 564
-    ExplicitWidth = 900
     object lblTotal: TLabel
       Left = 8
       Top = 8
@@ -172,18 +163,17 @@ object FrmCadVenda: TFrmCadVenda
     BevelOuter = bvNone
     Caption = ''
     TabOrder = 3
-    ExplicitHeight = 452
-    object btnAddItem: TcxButton
+    object btnAddItem: TButton
       Left = 8
       Top = 8
-      Width = 120
+      Width = 130
       Height = 28
       Caption = '+ &Adicionar Item'
       TabOrder = 0
       OnClick = btnAddItemClick
     end
-    object btnDelItem: TcxButton
-      Left = 136
+    object btnDelItem: TButton
+      Left = 146
       Top = 8
       Width = 120
       Height = 28
@@ -191,49 +181,37 @@ object FrmCadVenda: TFrmCadVenda
       TabOrder = 1
       OnClick = btnDelItemClick
     end
-    object cxGridItens: TcxGrid
+    object lvItens: TListView
       Left = 0
       Top = 44
       Width = 900
       Height = 408
       Anchors = [akLeft, akTop, akRight, akBottom]
+      Columns = <
+        item
+          Caption = '#'
+          Width = 40
+        end
+        item
+          Caption = 'Produto'
+          Width = 300
+        end
+        item
+          Caption = 'Qtd'
+          Width = 80
+        end
+        item
+          Caption = 'Pre'#231'o Unit.'
+          Width = 120
+        end
+        item
+          Caption = 'Total'
+          Width = 120
+        end>
+      ReadOnly = True
+      RowSelect = True
       TabOrder = 2
-      ExplicitWidth = 900
-      ExplicitHeight = 408
-      object cxGridItensLevel: TcxGridLevel
-        GridView = cxGridItensTableView
-      end
-      object cxGridItensTableView: TcxGridTableView
-        NavigatorButtons.ConfirmDelete = False
-        DataController.Summary.DefaultGroupSummaryItems = <>
-        DataController.Summary.FooterSummaryItems = <>
-        DataController.Summary.SummaryGroups = <>
-        OptionsCustomize.ColumnFiltering = False
-        OptionsData.Editing = False
-        OptionsView.GroupByBox = False
-        Columns = <
-          item
-            Caption = '#'
-            MinWidth = 40
-            Width = 50
-          end
-          item
-            Caption = 'Produto'
-            Width = 280
-          end
-          item
-            Caption = 'Qtd'
-            Width = 80
-          end
-          item
-            Caption = 'Pre'#231'o Unit.'
-            Width = 120
-          end
-          item
-            Caption = 'Total'
-            Width = 120
-          end>
-      end
+      ViewStyle = vsReport
     end
   end
 end

@@ -29,6 +29,7 @@ type
 implementation
 
 uses
+  FireDAC.Stan.Param,
   uExceptions;
 
 const

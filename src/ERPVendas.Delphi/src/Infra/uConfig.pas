@@ -15,7 +15,8 @@ type
   strict private
     class var FInstance: TConfig;
     class var FLock: TCriticalSection;
-    FArquivo: string;
+    var
+      FArquivo: string;
 
     // Banco
     FDbServer: string;

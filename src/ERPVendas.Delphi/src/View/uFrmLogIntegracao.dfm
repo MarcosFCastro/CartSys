@@ -21,9 +21,7 @@ object FrmLogIntegracao: TFrmLogIntegracao
     Align = alBottom
     BevelOuter = bvNone
     TabOrder = 0
-    ExplicitTop = 516
-    ExplicitWidth = 1000
-    object btnAtualizar: TcxButton
+    object btnAtualizar: TButton
       Left = 8
       Top = 8
       Width = 100
@@ -32,16 +30,16 @@ object FrmLogIntegracao: TFrmLogIntegracao
       TabOrder = 0
       OnClick = btnAtualizarClick
     end
-    object btnReenviar: TcxButton
+    object btnReenviar: TButton
       Left = 116
       Top = 8
-      Width = 120
+      Width = 150
       Height = 28
       Caption = '&Reenviar Selecionado'
       TabOrder = 1
       OnClick = btnReenviarClick
     end
-    object btnFechar: TcxButton
+    object btnFechar: TButton
       Left = 896
       Top = 8
       Width = 96
@@ -52,75 +50,21 @@ object FrmLogIntegracao: TFrmLogIntegracao
       OnClick = btnFecharClick
     end
   end
-  object cxGrid: TcxGrid
+  object dbgLog: TDBGrid
     Left = 0
     Top = 0
     Width = 1000
     Height = 516
     Align = alClient
+    DataSource = DataSource
+    Options = [dgTitles, dgIndicator, dgColumnResize, dgColLines, dgRowLines, dgTabs, dgRowSelect, dgAlwaysShowSelection]
+    ReadOnly = True
     TabOrder = 1
-    ExplicitLeft = 0
-    ExplicitTop = 0
-    ExplicitWidth = 1000
-    ExplicitHeight = 516
-    object cxGridLevel: TcxGridLevel
-      GridView = cxGridDBTableView
-    end
-    object cxGridDBTableView: TcxGridDBTableView
-      DataController.DataSource = DataSource
-      DataController.Summary.DefaultGroupSummaryItems = <>
-      DataController.Summary.FooterSummaryItems = <>
-      DataController.Summary.SummaryGroups = <>
-      OptionsCustomize.ColumnFiltering = False
-      OptionsData.Editing = False
-      OptionsView.GroupByBox = False
-      Columns = <
-        item
-          DataBinding.FieldName = 'DT_EVENTO'
-          Caption = 'Data/Hora'
-          Width = 130
-        end
-        item
-          DataBinding.FieldName = 'TIPO'
-          Caption = 'Tipo'
-          Width = 90
-        end
-        item
-          DataBinding.FieldName = 'DIRECAO'
-          Caption = 'Dire'#231#227'o'
-          Width = 80
-        end
-        item
-          DataBinding.FieldName = 'ENDPOINT'
-          Caption = 'Endpoint'
-          Width = 200
-        end
-        item
-          DataBinding.FieldName = 'METODO_HTTP'
-          Caption = 'M'#233'todo'
-          Width = 70
-        end
-        item
-          DataBinding.FieldName = 'STATUS_HTTP'
-          Caption = 'Status HTTP'
-          Width = 90
-        end
-        item
-          DataBinding.FieldName = 'SUCESSO'
-          Caption = 'Sucesso'
-          Width = 65
-        end
-        item
-          DataBinding.FieldName = 'ID_VENDA'
-          Caption = 'Id Venda'
-          Width = 70
-        end
-        item
-          DataBinding.FieldName = 'MENSAGEM_ERRO'
-          Caption = 'Mensagem Erro'
-          Width = 200
-        end>
-    end
+    TitleFont.Charset = DEFAULT_CHARSET
+    TitleFont.Color = clWindowText
+    TitleFont.Height = -12
+    TitleFont.Name = 'Segoe UI'
+    TitleFont.Style = []
   end
   object FDQuery: TFDQuery
     Left = 904
