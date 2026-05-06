@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Report ScriptLanguage="CSharp"
+        ReportInfo.Name="Relatório Financeiro"
+        ReportInfo.Author="CartSys"
+        ReportInfo.Description="Relatório de Títulos - ERP Financeiro">
+  <Dictionary>
+    <TableDataSource Name="Titulos" ReferenceName="Titulos" DataType="System.Data.DataTable">
+      <Column Name="Id"           DataType="System.Int32"/>
+      <Column Name="NumeroVenda"  DataType="System.Int32"/>
+      <Column Name="NomeCliente"  DataType="System.String"/>
+      <Column Name="Valor"        DataType="System.Decimal"/>
+      <Column Name="DtEmissao"    DataType="System.DateTime"/>
+      <Column Name="DtVencimento" DataType="System.DateTime"/>
+      <Column Name="Status"       DataType="System.String"/>
+    </TableDataSource>
+    <Parameter Name="DataInicio"      DataType="System.DateTime"/>
+    <Parameter Name="DataFim"         DataType="System.DateTime"/>
+    <Parameter Name="TotalRecebido"   DataType="System.Decimal"/>
+    <Parameter Name="TotalPendente"   DataType="System.Decimal"/>
+    <Parameter Name="TotalCancelado"  DataType="System.Decimal"/>
+  </Dictionary>
+
+  <ReportPage Name="Page1" Landscape="true"
+              PaperWidth="297" PaperHeight="210"
+              LeftMargin="10" RightMargin="10"
+              TopMargin="10"  BottomMargin="10">
+
+    <!-- Título do relatório e período -->
+    <ReportTitleBand Name="ReportTitle1" Width="277" Height="20">
+      <TextObject Name="txtTitulo"
+                  Left="0" Top="0" Width="200" Height="11"
+                  Font="Arial, 13pt, style=Bold"
+                  Text="Relatório Financeiro — CartSys"
+                  VertAlign="Center"/>
+      <TextObject Name="txtPeriodo"
+                  Left="0" Top="12" Width="277" Height="7"
+                  Font="Arial, 8pt"
+                  Text="Período: [Parameters.DataInicio.Value.ToString(&quot;dd/MM/yyyy&quot;)] a [Parameters.DataFim.Value.ToString(&quot;dd/MM/yyyy&quot;)]"/>
+    </ReportTitleBand>
+
+    <!-- Cabeçalho de colunas (repete em cada página) -->
+    <PageHeaderBand Name="PageHeader1" Width="277" Height="8"
+                    Fill.Color="Silver">
+      <TextObject Name="hId"      Left="0"   Top="0" Width="14" Height="8"
+                  Font="Arial, 8pt, style=Bold" Text="ID"
+                  VertAlign="Center"/>
+      <TextObject Name="hVenda"   Left="14"  Top="0" Width="20" Height="8"
+                  Font="Arial, 8pt, style=Bold" Text="Venda"
+                  VertAlign="Center"/>
+      <TextObject Name="hCliente" Left="34"  Top="0" Width="85" Height="8"
+                  Font="Arial, 8pt, style=Bold" Text="Cliente"
+                  VertAlign="Center"/>
+      <TextObject Name="hValor"   Left="119" Top="0" Width="28" Height="8"
+                  Font="Arial, 8pt, style=Bold" Text="Valor"
+                  HorzAlign="Right" VertAlign="Center"/>
+      <TextObject Name="hEmissao" Left="147" Top="0" Width="28" Height="8"
+                  Font="Arial, 8pt, style=Bold" Text="Emissão"
+                  VertAlign="Center"/>
+      <TextObject Name="hVencto"  Left="175" Top="0" Width="28" Height="8"
+                  Font="Arial, 8pt, style=Bold" Text="Vencimento"
+                  VertAlign="Center"/>
+      <TextObject Name="hStatus"  Left="203" Top="0" Width="34" Height="8"
+                  Font="Arial, 8pt, style=Bold" Text="Status"
+                  VertAlign="Center"/>
+    </PageHeaderBand>
+
+    <!-- Linha de dados -->
+    <DataBand Name="Data1" DataSource="Titulos" Width="277" Height="7">
+      <TextObject Name="dId"      Left="0"   Top="0" Width="14" Height="7"
+                  Font="Arial, 8pt"
+                  Text="[Titulos.Id]" VertAlign="Center"/>
+      <TextObject Name="dVenda"   Left="14"  Top="0" Width="20" Height="7"
+                  Font="Arial, 8pt"
+                  Text="[Titulos.NumeroVenda]" VertAlign="Center"/>
+      <TextObject Name="dCliente" Left="34"  Top="0" Width="85" Height="7"
+                  Font="Arial, 8pt"
+                  Text="[Titulos.NomeCliente]" VertAlign="Center"/>
+      <TextObject Name="dValor"   Left="119" Top="0" Width="28" Height="7"
+                  Font="Arial, 8pt"
+                  Text="[Titulos.Valor.ToString(&quot;N2&quot;)]"
+                  HorzAlign="Right" VertAlign="Center"/>
+      <TextObject Name="dEmissao" Left="147" Top="0" Width="28" Height="7"
+                  Font="Arial, 8pt"
+                  Text="[Titulos.DtEmissao.ToString(&quot;dd/MM/yyyy&quot;)]"
+                  VertAlign="Center"/>
+      <TextObject Name="dVencto"  Left="175" Top="0" Width="28" Height="7"
+                  Font="Arial, 8pt"
+                  Text="[Titulos.DtVencimento.ToString(&quot;dd/MM/yyyy&quot;)]"
+                  VertAlign="Center"/>
+      <TextObject Name="dStatus"  Left="203" Top="0" Width="34" Height="7"
+                  Font="Arial, 8pt"
+                  Text="[Titulos.Status]" VertAlign="Center"/>
+    </DataBand>
+
+    <!-- Totalizadores e paginação no rodapé -->
+    <PageFooterBand Name="PageFooter1" Width="277" Height="14"
+                    Fill.Color="WhiteSmoke">
+      <TextObject Name="txtTotais"
+                  Left="0" Top="3" Width="230" Height="8"
+                  Font="Arial, 8pt"
+                  Text="Recebido: R$ [Parameters.TotalRecebido.Value.ToString(&quot;N2&quot;)]   |   Pendente: R$ [Parameters.TotalPendente.Value.ToString(&quot;N2&quot;)]   |   Cancelado: R$ [Parameters.TotalCancelado.Value.ToString(&quot;N2&quot;)]"/>
+      <TextObject Name="txtPagina"
+                  Left="240" Top="3" Width="37" Height="8"
+                  Font="Arial, 8pt"
+                  Text="Pág. [PageN] / [TotalPages]"
+                  HorzAlign="Right"/>
+    </PageFooterBand>
+
+  </ReportPage>
+</Report>

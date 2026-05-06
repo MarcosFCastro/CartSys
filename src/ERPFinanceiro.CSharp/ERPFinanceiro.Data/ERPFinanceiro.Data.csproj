@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net48</TargetFramework>
+    <AssemblyName>ERPFinanceiro.Data</AssemblyName>
+    <RootNamespace>ERPFinanceiro.Data</RootNamespace>
+    <LangVersion>7.3</LangVersion>
+    <Nullable>disable</Nullable>
+    <Optimize Condition="'$(Configuration)' == 'Release'">true</Optimize>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ERPFinanceiro.Domain\ERPFinanceiro.Domain.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="EntityFramework" Version="6.4.4" />
+    <!-- FirebirdSql.Data.EntityFramework6 traz FirebirdSql.Data.FirebirdClient como dependencia -->
+    <PackageReference Include="FirebirdSql.Data.EntityFramework6" Version="9.1.1" />
+  </ItemGroup>
+
+</Project>

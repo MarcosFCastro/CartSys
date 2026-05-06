@@ -1,0 +1,118 @@
+/* ============================================================================
+   ERP VENDAS - Tabelas
+   ============================================================================ */
+
+SET NAMES UTF8;
+CONNECT 'C:\CartSys\DB\ERP_VENDAS.FDB' USER 'SYSDBA' PASSWORD 'masterkey';
+
+/* ----------------------------------------------------------------------------
+   CLIENTES
+   ---------------------------------------------------------------------------- */
+CREATE TABLE CLIENTES (
+    ID            INTEGER       NOT NULL,
+    NOME          VARCHAR(120)  NOT NULL,
+    CPF_CNPJ      VARCHAR(20)   NOT NULL,
+    EMAIL         VARCHAR(120),
+    TELEFONE      VARCHAR(20),
+    ENDERECO      VARCHAR(200),
+    CIDADE        VARCHAR(80),
+    UF            CHAR(2),
+    CEP           VARCHAR(10),
+    ATIVO         CHAR(1)       DEFAULT 'S' NOT NULL,
+    DT_CADASTRO   TIMESTAMP     DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    DT_ALTERACAO  TIMESTAMP,
+    CONSTRAINT PK_CLIENTES        PRIMARY KEY (ID),
+    CONSTRAINT UQ_CLIENTES_DOC    UNIQUE (CPF_CNPJ),
+    CONSTRAINT CK_CLIENTES_ATIVO  CHECK (ATIVO IN ('S','N'))
+);
+
+COMMENT ON TABLE CLIENTES IS 'Cadastro de clientes do ERP de Vendas';
+COMMENT ON COLUMN CLIENTES.ATIVO IS 'S = Ativo, N = Inativo (soft delete)';
+
+/* ----------------------------------------------------------------------------
+   PRODUTOS
+   ---------------------------------------------------------------------------- */
+CREATE TABLE PRODUTOS (
+    ID            INTEGER         NOT NULL,
+    CODIGO        VARCHAR(30)     NOT NULL,
+    DESCRICAO     VARCHAR(200)    NOT NULL,
+    UNIDADE       VARCHAR(6)      DEFAULT 'UN' NOT NULL,
+    PRECO_VENDA   NUMERIC(15,4)   DEFAULT 0 NOT NULL,
+    ESTOQUE       NUMERIC(15,4)   DEFAULT 0 NOT NULL,
+    ATIVO         CHAR(1)         DEFAULT 'S' NOT NULL,
+    DT_CADASTRO   TIMESTAMP       DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    DT_ALTERACAO  TIMESTAMP,
+    CONSTRAINT PK_PRODUTOS        PRIMARY KEY (ID),
+    CONSTRAINT UQ_PRODUTOS_CODIGO UNIQUE (CODIGO),
+    CONSTRAINT CK_PRODUTOS_ATIVO  CHECK (ATIVO IN ('S','N')),
+    CONSTRAINT CK_PRODUTOS_PRECO  CHECK (PRECO_VENDA >= 0)
+);
+
+/* ----------------------------------------------------------------------------
+   VENDAS
+   ---------------------------------------------------------------------------- */
+CREATE TABLE VENDAS (
+    ID                     INTEGER         NOT NULL,
+    NUMERO                 INTEGER         NOT NULL,
+    ID_CLIENTE             INTEGER         NOT NULL,
+    DT_VENDA               TIMESTAMP       DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    VALOR_TOTAL            NUMERIC(15,2)   DEFAULT 0 NOT NULL,
+    DESCONTO               NUMERIC(15,2)   DEFAULT 0 NOT NULL,
+    VALOR_LIQUIDO          NUMERIC(15,2)   DEFAULT 0 NOT NULL,
+    STATUS                 VARCHAR(20)     DEFAULT 'PENDENTE' NOT NULL,
+    ID_FINANCEIRO_EXTERNO  INTEGER,
+    DT_QUITACAO            TIMESTAMP,
+    DT_CANCELAMENTO        TIMESTAMP,
+    EMAIL_ENVIADO          CHAR(1)         DEFAULT 'N' NOT NULL,
+    DT_EMAIL_ENVIADO       TIMESTAMP,
+    OBSERVACOES            VARCHAR(500),
+    DT_CADASTRO            TIMESTAMP       DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    DT_ALTERACAO           TIMESTAMP,
+    CONSTRAINT PK_VENDAS         PRIMARY KEY (ID),
+    CONSTRAINT UQ_VENDAS_NUMERO  UNIQUE (NUMERO),
+    CONSTRAINT FK_VENDAS_CLIENTE FOREIGN KEY (ID_CLIENTE) REFERENCES CLIENTES(ID),
+    CONSTRAINT CK_VENDAS_STATUS  CHECK (STATUS IN ('PENDENTE','QUITADA','CANCELADA','INTEGRACAO_PENDENTE')),
+    CONSTRAINT CK_VENDAS_EMAIL   CHECK (EMAIL_ENVIADO IN ('S','N')),
+    CONSTRAINT CK_VENDAS_VALORES CHECK (VALOR_TOTAL >= 0 AND DESCONTO >= 0 AND VALOR_LIQUIDO >= 0)
+);
+
+/* ----------------------------------------------------------------------------
+   VENDAS_ITENS
+   ---------------------------------------------------------------------------- */
+CREATE TABLE VENDAS_ITENS (
+    ID              INTEGER         NOT NULL,
+    ID_VENDA        INTEGER         NOT NULL,
+    ID_PRODUTO      INTEGER         NOT NULL,
+    QUANTIDADE      NUMERIC(15,4)   NOT NULL,
+    PRECO_UNITARIO  NUMERIC(15,4)   NOT NULL,
+    DESCONTO        NUMERIC(15,2)   DEFAULT 0 NOT NULL,
+    VALOR_TOTAL     NUMERIC(15,2)   NOT NULL,
+    CONSTRAINT PK_VENDAS_ITENS         PRIMARY KEY (ID),
+    CONSTRAINT FK_VENDAS_ITENS_VENDA   FOREIGN KEY (ID_VENDA)   REFERENCES VENDAS(ID)   ON DELETE CASCADE,
+    CONSTRAINT FK_VENDAS_ITENS_PRODUTO FOREIGN KEY (ID_PRODUTO) REFERENCES PRODUTOS(ID),
+    CONSTRAINT CK_VENDAS_ITENS_QTD     CHECK (QUANTIDADE > 0),
+    CONSTRAINT CK_VENDAS_ITENS_PRECO   CHECK (PRECO_UNITARIO >= 0)
+);
+
+/* ----------------------------------------------------------------------------
+   LOG_INTEGRACAO - rastreabilidade da comunicacao com o ERP Financeiro
+   ---------------------------------------------------------------------------- */
+CREATE TABLE LOG_INTEGRACAO (
+    ID              INTEGER       NOT NULL,
+    DT_EVENTO       TIMESTAMP     DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    TIPO            VARCHAR(30)   NOT NULL,
+    DIRECAO         VARCHAR(10)   NOT NULL,
+    ENDPOINT        VARCHAR(200),
+    METODO_HTTP     VARCHAR(10),
+    REQUEST_BODY    BLOB SUB_TYPE TEXT,
+    RESPONSE_BODY   BLOB SUB_TYPE TEXT,
+    STATUS_HTTP     INTEGER,
+    SUCESSO         CHAR(1)       NOT NULL,
+    MENSAGEM_ERRO   VARCHAR(500),
+    ID_VENDA        INTEGER,
+    CONSTRAINT PK_LOG_INTEGRACAO    PRIMARY KEY (ID),
+    CONSTRAINT CK_LOG_DIRECAO       CHECK (DIRECAO IN ('SAIDA','ENTRADA')),
+    CONSTRAINT CK_LOG_SUCESSO       CHECK (SUCESSO IN ('S','N'))
+);
+
+COMMIT WORK;

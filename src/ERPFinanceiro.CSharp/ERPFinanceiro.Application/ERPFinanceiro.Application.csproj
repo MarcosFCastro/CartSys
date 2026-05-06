@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net48</TargetFramework>
+    <AssemblyName>ERPFinanceiro.Application</AssemblyName>
+    <RootNamespace>ERPFinanceiro.Application</RootNamespace>
+    <LangVersion>7.3</LangVersion>
+    <Nullable>disable</Nullable>
+    <Optimize Condition="'$(Configuration)' == 'Release'">true</Optimize>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ERPFinanceiro.Domain\ERPFinanceiro.Domain.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- AutoMapper 12.x suporta net462+; funciona em net48 -->
+    <PackageReference Include="AutoMapper" Version="12.0.1" />
+    <!-- FluentValidation 8.6.3 compativel com FluentValidation.WebApi do mesmo major -->
+    <PackageReference Include="FluentValidation" Version="8.6.3" />
+  </ItemGroup>
+
+</Project>

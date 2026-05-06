@@ -1,0 +1,194 @@
+# =============================================================================
+# CartSys-Desafio — .gitignore
+# Cobre: Delphi (RAD Studio 10.3) + C# (.NET Framework 4.8) + ferramentas comuns
+# =============================================================================
+
+# ---------------------------------------------------------------------------
+# Delphi / RAD Studio
+# ---------------------------------------------------------------------------
+
+# Unidades compiladas e binários intermediários
+*.dcu
+*.dcp
+*.dcpil
+*.dpu
+*.bpl
+*.bpi
+*.lib
+*.a
+*.map
+*.o
+
+# Executáveis e bibliotecas geradas
+*.exe
+*.dll
+*.so
+
+# Arquivos temporários / backup do IDE
+*.~*
+*.$$$
+*.~pas
+*.~dfm
+*.~dpr
+*.~dpk
+
+# Histórico e identidade do IDE
+__history/
+*.identcache
+*.local
+*.stat
+
+# Pastas de saída padrão do Delphi
+Win32/
+Win64/
+Android/
+Android64/
+iOSDevice/
+iOSDevice32/
+iOSDevice64/
+iOSSimulator/
+OSX32/
+OSX64/
+Linux64/
+
+# Arquivo de opções locais do projeto
+*.dof
+*.cfg
+*.bdsproj.local
+
+# Módulos de dados gerados
+*.res
+# (mantenha .res gerado do projeto principal se necessário — remova a linha acima se compilar limpo)
+
+# ModelMaker / Together
+*.mmf
+
+# Crash dumps
+*.mdmp
+
+# ---------------------------------------------------------------------------
+# C# / .NET Framework 4.8
+# ---------------------------------------------------------------------------
+
+# Pastas de build
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+
+# Pastas de publicação
+[Pp]ublish/
+[Pp]ublishProfiles/
+PublishOutput/
+
+# NuGet
+packages/
+*.nupkg
+*.snupkg
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# Arquivos de usuário por máquina
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Arquivos temporários do Visual Studio
+.vs/
+*.cache
+*.aps
+*.ncb
+*.opendb
+*.opensdf
+*.sdf
+*.unsuccessfulbuild
+
+# ReSharper
+_ReSharper*/
+*.ReSharper
+*.dotCover
+
+# Rider
+.idea/
+*.sln.iml
+
+# TestResults
+TestResults/
+[Tt]est[Rr]esult*/
+*.trx
+*.coverage
+*.coveragexml
+
+# Windows Installer
+*.msi
+*.msix
+*.msm
+*.msp
+
+# ClickOnce
+publish/
+
+# Backup
+Backup*/
+
+# ---------------------------------------------------------------------------
+# Logs em tempo de execução (não commitar logs gerados)
+# ---------------------------------------------------------------------------
+logs/
+*.log
+# Fast Report design (gerado em runtime), mas NÃO o template .frx de design
+# *.frx   <- manter no repo (é o template editável)
+
+# ---------------------------------------------------------------------------
+# Banco de dados Firebird (binários, não commitar)
+# ---------------------------------------------------------------------------
+*.fdb
+*.gdb
+
+# ---------------------------------------------------------------------------
+# Credenciais e segredos
+# ---------------------------------------------------------------------------
+*.env
+*.env.*
+secrets.*
+appsettings.Production.json
+appsettings.*.Local.json
+App.Release.config
+# Manter: App.config, appsettings.json (com placeholders)
+
+# ---------------------------------------------------------------------------
+# Sistema operacional
+# ---------------------------------------------------------------------------
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# macOS (se algum contribuidor usar Mac)
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# ---------------------------------------------------------------------------
+# Ferramentas diversas
+# ---------------------------------------------------------------------------
+
+# Node (se usar alguma tool JS no futuro)
+node_modules/
+npm-debug.log*
+
+# Docker
+.dockerignore
+
+# Postman environments com dados sensíveis (manter a collection)
+postman/*environment*.json
+
+# Arquivos temporários de geração de PDF
+Pedido_*.pdf

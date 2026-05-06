@@ -1,0 +1,57 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net48</TargetFramework>
+    <OutputType>Exe</OutputType>
+    <AssemblyName>ERPFinanceiro.Api</AssemblyName>
+    <RootNamespace>ERPFinanceiro.Api</RootNamespace>
+    <LangVersion>7.3</LangVersion>
+    <Nullable>disable</Nullable>
+    <Optimize Condition="'$(Configuration)' == 'Release'">true</Optimize>
+    <StartupObject>ERPFinanceiro.Api.Program</StartupObject>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ERPFinanceiro.Domain\ERPFinanceiro.Domain.csproj" />
+    <ProjectReference Include="..\ERPFinanceiro.Application\ERPFinanceiro.Application.csproj" />
+    <ProjectReference Include="..\ERPFinanceiro.Data\ERPFinanceiro.Data.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Self-host OWIN + Web API 2 -->
+    <PackageReference Include="Microsoft.AspNet.WebApi.OwinSelfHost" Version="5.2.9" />
+    <PackageReference Include="Microsoft.Owin.Host.HttpListener" Version="4.2.2" />
+
+    <!-- DI Container -->
+    <PackageReference Include="SimpleInjector" Version="5.4.5" />
+    <PackageReference Include="SimpleInjector.Integration.WebApi" Version="5.4.5" />
+
+    <!-- Documentacao da API -->
+    <PackageReference Include="Swashbuckle.Core" Version="5.6.0" />
+
+    <!-- Logging -->
+    <PackageReference Include="NLog" Version="5.3.4" />
+
+    <!-- Retry / resiliencia -->
+    <PackageReference Include="Polly" Version="7.2.4" />
+
+    <!-- Validacao - FluentValidation.WebApi exige mesmo major que FluentValidation -->
+    <PackageReference Include="FluentValidation" Version="8.6.3" />
+    <PackageReference Include="FluentValidation.WebApi" Version="8.6.3" />
+
+    <!-- Serializacao JSON -->
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+
+    <!-- Mapeamento - necessario em Startup.cs para registrar IMapper -->
+    <PackageReference Include="AutoMapper" Version="12.0.1" />
+  </ItemGroup>
+
+  <!-- Arquivos de configuracao copiados para o diretorio de saida -->
+  <ItemGroup>
+    <Content Include="nlog.config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <None Include="App.config" />
+  </ItemGroup>
+
+</Project>

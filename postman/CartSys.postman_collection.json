@@ -1,0 +1,96 @@
+{
+  "info": {
+    "name": "CartSys - Desafio",
+    "description": "Coleção de testes da integração ERP Vendas (Delphi) <-> ERP Financeiro (C#)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "urlFinanceiro", "value": "http://localhost:5001" },
+    { "key": "urlVendas",     "value": "http://localhost:5002" },
+    { "key": "apiKey",        "value": "cartsys-dev-key" }
+  ],
+  "item": [
+    {
+      "name": "Financeiro - Health",
+      "request": {
+        "method": "GET",
+        "url": "{{urlFinanceiro}}/api/v1/health"
+      }
+    },
+    {
+      "name": "Financeiro - Criar Titulo",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "X-API-Key", "value": "{{apiKey}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "url": "{{urlFinanceiro}}/api/v1/titulos",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"idVendaExterna\": 1,\n  \"numeroVenda\": 1001,\n  \"idClienteExterno\": 1,\n  \"nomeCliente\": \"Cliente Teste 01\",\n  \"docCliente\": \"12345678901\",\n  \"emailCliente\": \"cliente01@teste.com\",\n  \"valor\": 4620.00,\n  \"dtVencimento\": \"2026-06-04\",\n  \"observacoes\": \"Pedido 1001\"\n}"
+        }
+      }
+    },
+    {
+      "name": "Financeiro - Listar Titulos",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "X-API-Key", "value": "{{apiKey}}" }],
+        "url": "{{urlFinanceiro}}/api/v1/titulos?status=PENDENTE&page=1&pageSize=50"
+      }
+    },
+    {
+      "name": "Financeiro - Quitar",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "X-API-Key", "value": "{{apiKey}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "url": "{{urlFinanceiro}}/api/v1/titulos/1/quitar",
+        "body": {
+          "mode": "raw",
+          "raw": "{ \"formaPagamento\": \"PIX\", \"observacao\": \"Pago via PIX\" }"
+        }
+      }
+    },
+    {
+      "name": "Financeiro - Cancelar",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "X-API-Key", "value": "{{apiKey}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "url": "{{urlFinanceiro}}/api/v1/titulos/1/cancelar",
+        "body": {
+          "mode": "raw",
+          "raw": "{ \"motivo\": \"Cliente desistiu\" }"
+        }
+      }
+    },
+    {
+      "name": "Vendas - Health",
+      "request": {
+        "method": "GET",
+        "url": "{{urlVendas}}/api/v1/health"
+      }
+    },
+    {
+      "name": "Vendas - Callback Quitacao (simular)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "X-API-Key", "value": "{{apiKey}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "url": "{{urlVendas}}/api/v1/vendas/1/notificar-quitacao",
+        "body": {
+          "mode": "raw",
+          "raw": "{ \"idTitulo\": 1, \"dtQuitacao\": \"2026-05-04T15:30:00\", \"formaPagamento\": \"PIX\" }"
+        }
+      }
+    }
+  ]
+}
